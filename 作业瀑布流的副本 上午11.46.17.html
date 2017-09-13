@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			div {
+				background: #ccc;
+				width: 200px;
+				position: absolute;
+				transition: 0.5s;
+			}
+		</style>
+	</head>
+	<body>
+	</body>
+	<script type="text/javascript">
+		//页面首先加载100个div
+		createDiv();
+		//创建div
+		function createDiv(){
+			for (var i=0;i<100;i++) {
+				var div = document.createElement("div");
+				//调用随机数
+				div.style.height= rand(100,400) +"px";
+				div.innerText = i;
+				div.style.background = "rgb("+rand(0,255)+","+rand(0,255)+","+rand(0,255)+")";
+				//在body里面添加、
+				document.body.appendChild(div);
+			}
+			//调用改变位置的函数
+			change();
+		}
+		//改变位置的函数
+		function change(){
+			var div = document.getElementsByTagName("div");
+			//获取可视窗口的宽，offsetWidth包括边线，建议使用clientWidth
+			var window_width = document.documentElement.clientWidth;
+			//一行可以排列多少个
+			var num = Math.floor(window_width/210);
+			//如果一个也放不了，它还会vavava一列排列，没有if判断的话，如果div宽度变宽，所有200改成500，然后将浏览器变成最窄，会排在一起在一个位置
+			if(num<=0){
+				return;
+			}
+			//内容和body的左右距离，类似于padding部分
+			var left_or_right = (window_width-210*num)/2;
+			//用于存放div的高；
+			var arrH=[];
+			for(var i=0;i<div.length;i++){
+				//判断是一行中得第几个
+				var j=i%num;
+				//当一行盘满后，转到下一行
+				if(arrH.length == num){
+					//找到一行中最矮的div，
+					var min = Min(arrH);
+					//将下一行的第一个元素排到上一行最矮的div下面
+					div[i].style.left = left_or_right + min*210+"px";
+					div[i].style.top = arrH[min] + 10+"px";
+					
+					//将上一行最矮的高度 加上排在其下面的div的高度，重新进行判断那个div才是最矮的
+					arrH[min] +=div[i].offsetHeight+10;
+					
+				}else{
+					//如果没有排满
+					arrH[j] = div[i].offsetHeight;
+					div[i].style.left = left_or_right + 210*j+"px";
+					div[i].style.top = 0;
+				}
+			}
+		}
+		//如果窗口改变了大小
+		window.onresize = function(){
+			
+			change();
+		}
+		//如果滑动条滑动
+		window.onscroll = function(){
+			//documentElement这是返回当前元素的根节点，前面加document，意思就是整个页面的根节点
+			//获取页面的总高度
+			var bodyHeight = document.documentElement.offsetHeight;
+			//获取可视区域（窗口）的宽度
+			var windowHeight = document.documentElement.clientHeight;
+			//这两者的区别  http://www.cnblogs.com/fullhouse/archive/2012/01/16/2324131.html
+			// aa||bb写法是用于兼容的，下面这个前者用于ie，后者用户谷歌
+			var srcollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            var srcollH = document.body.scrollHeight;
+            //100这个数值可以随意改变，越大代表，还没滑动到低，又生成新的
+            if(srcollTop + windowHeight >=srcollH - 100){
+            		createDiv();
+            }
+		}
+		function rand(min,max){
+			return Math.floor(Math.random()*(max-min+1)+min);
+		}
+		function Min(arr){
+			var m =0;
+			for(var i=0;i<arr.length;i++){
+				m=Math.min(arr[m],arr[i])==arr[m]? m:i;
+			}
+			return m;
+		}
+	</script>
+</html>
